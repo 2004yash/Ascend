@@ -1,10 +1,8 @@
 import { NextResponse } from "next/server";
 import { GoogleGenerativeAI } from "@google/generative-ai";
-// import { connectDB, Roadmap } from "@/utils/db";
-// import axios from "axios";
 import { connectDB, Roadmap } from "@/utils/db";
 import { getServerSession } from "next-auth";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { authOptions } from "@/app/api/auth/options";
 import mongoose from "mongoose";
 
 const promptText = `

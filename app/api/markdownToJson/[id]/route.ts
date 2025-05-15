@@ -1,13 +1,15 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from 'next/server';
 import { connectDB, Roadmap } from "@/utils/db";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/options";
 import mongoose from "mongoose";
 
+export const dynamic = 'force-dynamic';
+
 // Get a specific roadmap by ID
 export async function GET(
-  request: Request,
-  { params }: { params: { id: string } }
+  _request: NextRequest,
+  context: { params: { id: string } }
 ) {
   try {
     await connectDB();
@@ -25,7 +27,7 @@ export async function GET(
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
-    const roadmapId = params.id;
+    const roadmapId = context.params.id;
     console.log("Getting roadmap with ID:", roadmapId);
 
     // Get a specific roadmap by ID
@@ -63,8 +65,8 @@ export async function GET(
 
 // Update a section's completion status
 export async function PATCH(
-  request: Request,
-  { params }: { params: { id: string } }
+  request: NextRequest,
+  context: { params: { id: string } }
 ) {
   try {
     await connectDB();
@@ -74,7 +76,7 @@ export async function PATCH(
       return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
     }
 
-    const roadmapId = params.id;
+    const roadmapId = context.params.id;
     const { sectionIndex, completed } = await request.json();
 
     // Get user ID
