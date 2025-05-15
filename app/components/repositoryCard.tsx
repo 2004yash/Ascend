@@ -1,5 +1,5 @@
 import React from "react";
-import { Star, GitFork, CheckCircle2 } from "lucide-react";
+import { Star, GitFork } from "lucide-react";
 import Link from "next/link";
 
 interface RepositoryCardProps {

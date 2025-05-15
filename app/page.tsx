@@ -13,7 +13,6 @@ import ContributionsGraph from "./components/contributionsGraph";
 import ActivityFeed from "./components/activityFeed";
 import Footer from "./components/footer";
 import axios from "axios";
-import { Language } from "@mui/icons-material";
 
 const MOCK_README = `# AI Roadmap Builder
 
