@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { connectDB, Roadmap } from "@/utils/db";
 import { getServerSession } from "next-auth";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { authOptions } from "@/app/api/auth/options";
 import mongoose from "mongoose";
 
 // Parse markdown table to extract sections
