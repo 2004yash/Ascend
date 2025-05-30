@@ -63,68 +63,6 @@ function parseMdToSections(markdownContent: string) {
   return sections;
 }
 
-// Update a section's completion status
-export async function PATCH(req: Request) {
-  try {
-    await connectDB();
-    const session = await getServerSession(authOptions);
-
-    if (!session || !session.user) {
-      return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
-    }
-
-    const url = new URL(req.url);
-    const pathParts = url.pathname.split("/");
-    const roadmapId = pathParts[pathParts.length - 1];
-
-    // If we don't have a roadmap ID, return an error
-    if (!roadmapId || roadmapId === "markdownToJson") {
-      return NextResponse.json(
-        { error: "Roadmap ID required" },
-        { status: 400 }
-      );
-    }
-
-    const { sectionIndex, completed } = await req.json();
-
-    // Get user ID
-    const user = await mongoose.models.User.findOne({
-      email: session.user.email,
-    });
-
-    if (!user) {
-      return NextResponse.json({ error: "User not found" }, { status: 404 });
-    }
-
-    // Find the roadmap and update the section
-    const roadmap = await Roadmap.findOne({
-      _id: roadmapId,
-      userId: user._id,
-    });
-
-    if (!roadmap) {
-      return NextResponse.json({ error: "Roadmap not found" }, { status: 404 });
-    }
-
-    // Update the section's completion status
-    const updatedSections = [...roadmap.sections];
-    if (updatedSections[sectionIndex]) {
-      updatedSections[sectionIndex].completed = completed;
-    }
-
-    // Save the updated roadmap
-    roadmap.sections = updatedSections;
-    roadmap.lastUpdated = new Date();
-    await roadmap.save();
-
-    return NextResponse.json({ success: true });
-  } catch (error) {
-    const errorMessage =
-      error instanceof Error ? error.message : "Unknown error occurred";
-    return NextResponse.json({ error: errorMessage }, { status: 500 });
-  }
-}
-
 // Create a new roadmap
 export async function POST(req: Request) {
   try {
