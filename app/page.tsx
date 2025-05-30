@@ -157,10 +157,9 @@ export default function Home() {
   const router = useRouter();
   const [repos, setRepos] = useState<Repository[]>([]);
   const [loading, setLoading] = useState(true);
-
   useEffect(() => {
     if (status === "unauthenticated") {
-      router.push("/api/auth/signin");
+      router.push("/landing");
     } // Define interface for API response
     interface ApiRepo {
       _id?: string;
