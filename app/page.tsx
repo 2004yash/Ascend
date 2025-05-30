@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
-import { useRouter } from "next/navigation";
 import { Search, ChevronDown } from "lucide-react";
 
 import Header from "./components/header";
@@ -13,6 +12,9 @@ import ContributionsGraph from "./components/contributionsGraph";
 import ActivityFeed from "./components/activityFeed";
 import Footer from "./components/footer";
 import axios from "axios";
+
+// Import the Landing Page component
+import LandingPage from "./landing/page";
 
 const MOCK_README = `# AI Roadmap Builder
 
@@ -154,94 +156,98 @@ const OverviewSection = ({ repos }: { repos: Repository[] }) => (
 export default function Home() {
   const [activeTab, setActiveTab] = useState("overview");
   const { status } = useSession();
-  const router = useRouter();
   const [repos, setRepos] = useState<Repository[]>([]);
   const [loading, setLoading] = useState(true);
+
   useEffect(() => {
-    if (status === "unauthenticated") {
-      router.push("/landing");
-    } // Define interface for API response
-    interface ApiRepo {
-      _id?: string;
-      name: string;
-      title?: string;
-      description: string;
-      language?: string;
-      languageColor?: string;
-      stars?: number;
-      forks?: number;
-      lastUpdated?: string;
-      sections?: RoadmapSection[];
-    }
-
-    // Helper function to calculate progress from sections
-    const calculateProgress = (sections?: RoadmapSection[]): number => {
-      if (!sections || sections.length === 0) return 0;
-      const completedSections = sections.filter(
-        (section) => section.completed
-      ).length;
-      return Math.round((completedSections / sections.length) * 100);
-    };
-
-    // Fetch repository data
-    const fetchRepos = async () => {
-      try {
-        const response = await axios.get("/api/markdownToJson");
-        const data: ApiRepo[] = response.data;
-        const formattedRepos = data.map((repo) => ({
-          _id: repo._id || `repo-${Math.random().toString(36).substr(2, 9)}`,
-          name: repo.name,
-          title: repo.title || repo.name,
-          description: repo.description,
-          language: repo.language || "Unknown",
-          languageColor: repo.languageColor || "#888888",
-          stars: repo.stars || 0,
-          forks: repo.forks || 0,
-          updatedAt: repo.lastUpdated || new Date().toISOString(),
-          sections: repo.sections || [],
-          progress: calculateProgress(repo.sections),
-        }));
-        setRepos(formattedRepos);
-      } catch (error) {
-        console.error("Error fetching repositories:", error);
-        // Set some default repos if API fails
-        setRepos([
-          {
-            _id: "repo-1",
-            name: "AI-Roadmap",
-            title: "AI Roadmap - Complete Learning Path",
-            description:
-              "A customizable roadmap for AI learning with comprehensive sections and resources",
-            language: "TypeScript",
-            languageColor: "#3178c6",
-            stars: 42,
-            forks: 12,
-            updatedAt: new Date().toISOString(),
-            progress: 65,
-          },
-          {
-            _id: "repo-2",
-            name: "ML-Fundamentals",
-            title: "Machine Learning Fundamentals",
-            description:
-              "Essential concepts in machine learning from beginner to advanced",
-            language: "Python",
-            languageColor: "#3572A5",
-            stars: 38,
-            forks: 8,
-            updatedAt: new Date().toISOString(),
-            progress: 30,
-          },
-        ]);
-      } finally {
-        setLoading(false);
+    // Only fetch data if user is authenticated
+    if (status === "authenticated") {
+      // Define interface for API response
+      interface ApiRepo {
+        _id?: string;
+        name: string;
+        title?: string;
+        description: string;
+        language?: string;
+        languageColor?: string;
+        stars?: number;
+        forks?: number;
+        lastUpdated?: string;
+        sections?: RoadmapSection[];
       }
-    };
 
-    fetchRepos();
-  }, [status, router]);
+      // Helper function to calculate progress from sections
+      const calculateProgress = (sections?: RoadmapSection[]): number => {
+        if (!sections || sections.length === 0) return 0;
+        const completedSections = sections.filter(
+          (section) => section.completed
+        ).length;
+        return Math.round((completedSections / sections.length) * 100);
+      };
 
-  if (status === "loading" || loading) {
+      // Fetch repository data
+      const fetchRepos = async () => {
+        try {
+          const response = await axios.get("/api/markdownToJson");
+          const data: ApiRepo[] = response.data;
+          const formattedRepos = data.map((repo) => ({
+            _id: repo._id || `repo-${Math.random().toString(36).substr(2, 9)}`,
+            name: repo.name,
+            title: repo.title || repo.name,
+            description: repo.description,
+            language: repo.language || "Unknown",
+            languageColor: repo.languageColor || "#888888",
+            stars: repo.stars || 0,
+            forks: repo.forks || 0,
+            updatedAt: repo.lastUpdated || new Date().toISOString(),
+            sections: repo.sections || [],
+            progress: calculateProgress(repo.sections),
+          }));
+          setRepos(formattedRepos);
+        } catch (error) {
+          console.error("Error fetching repositories:", error);
+          // Set some default repos if API fails
+          setRepos([
+            {
+              _id: "repo-1",
+              name: "AI-Roadmap",
+              title: "AI Roadmap - Complete Learning Path",
+              description:
+                "A customizable roadmap for AI learning with comprehensive sections and resources",
+              language: "TypeScript",
+              languageColor: "#3178c6",
+              stars: 42,
+              forks: 12,
+              updatedAt: new Date().toISOString(),
+              progress: 65,
+            },
+            {
+              _id: "repo-2",
+              name: "ML-Fundamentals",
+              title: "Machine Learning Fundamentals",
+              description:
+                "Essential concepts in machine learning from beginner to advanced",
+              language: "Python",
+              languageColor: "#3572A5",
+              stars: 38,
+              forks: 8,
+              updatedAt: new Date().toISOString(),
+              progress: 30,
+            },
+          ]);
+        } finally {
+          setLoading(false);
+        }
+      };
+
+      fetchRepos();
+    } else if (status === "unauthenticated") {
+      setLoading(false);
+    }
+  }, [status]);
+
+  // Show loading while determining authentication status
+  if (status === "loading") {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="animate-pulse text-slate-400">Loading...</div>
@@ -249,6 +255,21 @@ export default function Home() {
     );
   }
 
+  // Show landing page for unauthenticated users
+  if (status === "unauthenticated") {
+    return <LandingPage />;
+  }
+
+  // Show loading for authenticated users while data is being fetched
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="animate-pulse text-slate-400">Loading...</div>
+      </div>
+    );
+  }
+
+  // Show dashboard for authenticated users
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <Header activeTab={activeTab} onTabChange={setActiveTab} />
