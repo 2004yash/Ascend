@@ -47,11 +47,18 @@ export const authOptions: AuthOptions = {
             socials: [],
             location: "",
             bio: "",
-            followers: 0,
-            following: 0,
+            followers: [],
+            following: [],
             Achievements: [],
             Organizations: [],
           });
+        } else {
+          // Migration: Convert old number format to array format
+          if (typeof existingUser.followers === "number") {
+            existingUser.followers = [];
+            existingUser.following = [];
+            await existingUser.save();
+          }
         }
       }
       return true;
