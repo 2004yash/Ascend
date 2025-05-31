@@ -9,7 +9,7 @@ export const dynamic = "force-dynamic";
 // Get a specific roadmap by ID
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     await connectDB();
@@ -17,7 +17,10 @@ export async function GET(
 
     if (!session || !session.user) {
       return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
-    }    const user = await mongoose.models.User.findOne({
+    }
+
+    const { id } = await params;
+    const user = await mongoose.models.User.findOne({
       email: session.user.email,
     });
 
@@ -25,7 +28,7 @@ export async function GET(
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
-    const roadmapId = params.id;
+    const roadmapId = id;
     console.log("Getting roadmap with ID:", roadmapId);
 
     // Get a specific roadmap by ID
@@ -64,7 +67,7 @@ export async function GET(
 // Update a section's completion status
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     await connectDB();
@@ -74,7 +77,8 @@ export async function PATCH(
       return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
     }
 
-    const roadmapId = params.id;
+    const { id } = await params;
+    const roadmapId = id;
     const { sectionIndex, completed } = await request.json();
 
     // Get user ID
