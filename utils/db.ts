@@ -7,10 +7,23 @@ const userSchema = new Schema({
   socials: [String],
   location: { type: String },
   bio: { type: String },
-  followers: { type: Number },
-  following: { type: Number },
+  followers: [{ type: Schema.Types.ObjectId, ref: "User" }], 
+  following: [{ type: Schema.Types.ObjectId, ref: "User" }],
   Achievements: [String],
   Organizations: [String],
+});
+
+// Schema for follow requests
+const followRequestSchema = new Schema({
+  from: { type: Schema.Types.ObjectId, ref: "User", required: true },
+  to: { type: Schema.Types.ObjectId, ref: "User", required: true }, 
+  status: {
+    type: String,
+    enum: ["pending", "accepted", "rejected"],
+    default: "pending",
+  },
+  createdAt: { type: Date, default: Date.now },
+  updatedAt: { type: Date, default: Date.now },
 });
 
 // Schema for individual roadmap sections
@@ -60,6 +73,8 @@ const connectDB = async () => {
 
 // Export models
 export const User = mongoose.models.User || model("User", userSchema);
+export const FollowRequest =
+  mongoose.models.FollowRequest || model("FollowRequest", followRequestSchema);
 export const Roadmap =
   mongoose.models.Roadmap || model("Roadmap", roadmapSchema);
 export { connectDB };
